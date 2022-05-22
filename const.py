@@ -97,7 +97,7 @@ class TypeToken(Enum):
     TK_KWDOUBLE = auto()
 
     
-
+_listAlphabet="(\w|\d|-|+|*|\/|\\|\||&|\.|)"
 
 
 
@@ -110,7 +110,7 @@ _tableOfTypes={
     "^\+[^\+=]":TypeToken.TK_OPSUM,
     "^-[^-=>]":TypeToken.TK_OPSUB,
     "^\*[^\*=]":TypeToken.TK_OPMULT,
-    "^\\[^\\=]":TypeToken.TK_OPDIV,
+    "^\/[^\/=]":TypeToken.TK_OPDIV,
     "^%[^%=]":TypeToken.TK_OPMOD,
     "^\+\+(.|\n)":TypeToken.TK_OPINC,
     "^--(.|\n)":TypeToken.TK_OPDEC,
@@ -127,7 +127,7 @@ _tableOfTypes={
     "^\+=(.|\n)":TypeToken.TK_OPASUM,
     "^-=(.|\n)":TypeToken.TK_OPASUB,
     "^\*=(.|\n)":TypeToken.TK_OPAMULT,
-    "^\\=(.|\n)":TypeToken.TK_OPADIV,
+    "^\/=(.|\n)":TypeToken.TK_OPADIV,
     "^%=(.|\n)":TypeToken.TK_OPAMOD,
     "^<<=(.|\n)":TypeToken.TK_OPALEFTSHIFT,
     "^>>=(.|\n)":TypeToken.TK_OPARIGHTSHIFT,
