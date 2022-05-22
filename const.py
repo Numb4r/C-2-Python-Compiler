@@ -52,6 +52,8 @@ class TypeToken(Enum):
     TK_OPHEAD = auto()
     TK_OPDOT = auto()
     TK_OPARROW = auto()
+    TK_OPCOMMENT = auto()
+    TK_OPCOMMENTBLOCK = auto()
     # Delimiters
     TK_PARENTHESESOPEN = auto()
     TK_PARENTHESESCLOSE = auto()
@@ -100,13 +102,13 @@ class TypeToken(Enum):
 
 
 _tableOfTypes={
-    "^[a-zA-z][a-zA-Z0-9]*[^a-zA-Z0-9]":TypeToken.TK_IDENTIFIER,
+    "^[a-zA-Z\_][a-zA-Z0-9\_]*[^a-zA-Z0-9]":TypeToken.TK_IDENTIFIER,
     "^\d+\D":TypeToken.TK_INTEGER,
     "^\d+\.\d+\D":TypeToken.TK_FLOATINGPOINT,
     "^\'.*\'(.|\n)":TypeToken.TK_CHARLITERAL,
     "^\".*\"(.|\n)":TypeToken.TK_STRINGLITERAL,
     "^\+[^\+=]":TypeToken.TK_OPSUM,
-    "^-[^-=]":TypeToken.TK_OPSUB,
+    "^-[^-=>]":TypeToken.TK_OPSUB,
     "^\*[^\*=]":TypeToken.TK_OPMULT,
     "^\\[^\\=]":TypeToken.TK_OPDIV,
     "^%[^%=]":TypeToken.TK_OPMOD,
@@ -148,7 +150,10 @@ _tableOfTypes={
     "^}(.|\n)":TypeToken.TK_BRACESCLOSE,
     "^;(.|\n)":TypeToken.TK_OPEOL,
     "^#.":TypeToken.TK_OPHEAD,
-    "^\..":TypeToken.TK_OPDOT
+    "^\..":TypeToken.TK_OPDOT,
+    "^\/\/.*\n":TypeToken.TK_OPCOMMENT,
+    # "^\/\*(.|\s)*(\*\/|[^\w])":TypeToken.TK_OPCOMMENTBLOCK,
+    "^->.":TypeToken.TK_OPARROW
 }
     
 _keyWordsTable={
