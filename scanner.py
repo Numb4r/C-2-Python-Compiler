@@ -1,6 +1,8 @@
 from Token import Token
-import const as const
-from const import TypeToken
+# import const as c
+from const import _tableOfTypes
+from const import _keyWordsTable
+from const import TypeToken as tt
 import re
 class Scanner:
     def __init__(self,filename,debug=False):
@@ -10,9 +12,12 @@ class Scanner:
         self.debug = debug
         try:
             with open(filename) as file:
-                # self.content = [y for x in file.read().splitlines() for y in x]
+                f = file.read()
+                f = re.sub("\/\/.*",' ',f)
+                f = re.sub("\/\*(.|\s)*\*\/",' ',f)
+                v = f.splitlines()
                 self.content =[]
-                for x in file.read().splitlines():
+                for x in v:                    
                     for y in x:
                         self.content.append(y)
                     self.content.append("\n")
@@ -40,79 +45,40 @@ class Scanner:
             lexeme+=currentChar
             if self.debug == True:
                 print(currentChar,"-","-",self.pos,"-",self.estado)
-            for i in const._tableOfTypes:
-                if re.search(i,lexeme):
-                    lexemeType = const._tableOfTypes.get(i)
+            for i in _tableOfTypes:
+                if re.match(i,lexeme):
+                    lexemeType = _tableOfTypes.get(i)
                     lexeme = lexeme[:-1]
                     self.back()
                     endOfToken = True
-                    print(lexeme)
-                    kw = const._keyWordsTable.get(lexeme)
-                    
+                    # print(lexeme)
+                    kw = _keyWordsTable.get(lexeme)
                     lexemeType =  kw if  kw != None else lexemeType
-                    if lexemeType == const.TypeToken.TK_IDENTIFIER or lexemeType == const.TypeToken.TK_INTEGER or lexemeType == const.TypeToken.TK_FLOATINGPOINT or lexemeType == const.TypeToken.TK_CHARLITERAL or lexemeType == const.TypeToken.TK_STRINGLITERAL :
+                    if lexemeType == tt.TK_OPHEAD:
+                        currentChar = self.nextChar()
+                        # TODO: Corrigir bug que o header nao captura os atributos
+                        typeHeader = ''
+                        while not re.match("\n", currentChar):
+                            typeHeader += currentChar
+                            currentChar = self.nextChar()
+
+                        typeHeader,valor = typeHeader.split()
+                        token = Token(lexemeType,typeHeader,valor)
+                        valor = ''
+                        typeHeader = ''
+                        
+                        
+                    if lexemeType == tt.TK_IDENTIFIER or lexemeType == tt.TK_INTEGER or lexemeType == tt.TK_FLOATINGPOINT or lexemeType == tt.TK_CHARLITERAL or lexemeType == tt.TK_STRINGLITERAL :
                         token = Token(lexemeType,lexeme)
                     else:
                         token = Token(lexemeType)
                     return token
 
-            # if self.estado  == 0:
-            #     if self.isChar(currentChar):
-            #         lexeme+=currentChar
-            #         self.estado = 1
-            #     elif self.isDigit(currentChar):
-            #         lexeme+=currentChar
-            #         self.estado = 3
-            #     elif self.isSpace(currentChar):
-            #         self.estado = 0
-            #     elif  self.isOperator(currentChar):
-            #         self.estado =5
-            #     else:
-            #         raise Exception("Unrecognized Symbol")
-            # elif self.estado == 1:
-            #     if self.isChar(currentChar) or self.isDigit(currentChar):
-            #         self.estado = 1
-            #         lexeme+=currentChar
-            #     elif self.isSpace(currentChar) or self.isOperator(currentChar):
-            #         self.estado = 2
-            #     else:
-            #         raise "Malformed Identifier"
-            # elif self.estado == 2:
-            #     token = Token(const.const.TypeToken.TK_IDENTIFIER,lexeme)
-            #     self.back()
-            #     return token
-            # elif self.estado == 3:
-            #     if self.isDigit(currentChar):
-            #         self.estado==3
-            #         lexeme+=currentChar
-            #     elif not self.isChar(currentChar):
-            #         self.estado = 4;
-            #     else:
-            #         raise Exception("Unrecognized Number")
-            # elif self.estado == 4:
-            #     token = Token(const.const.TypeToken.TK_NUMBER,lexeme)
-            #     self.back()
-            #     return token
-            # elif self.estado == 5:
-            #     lexeme += currentChar
-            #     token = Token(const.TK_OPERATOR,lexeme)
-            #     return token
-                
-        
-    def isChar(self,c):
-        return True if re.search("[a-zA-Z]", c) else False
-    def isDigit(self,c):
-        return True if re.search("[0-9]",c) else False
-    def isOperator(self,c):
-        # return 
-        pass 
     def isSpace(self,c):
         return True if re.search("\s", c) else False
-        # return c == ' ' or c == '\t' or c == '\n' or c == '\r'
     def nextChar(self):
         c = self.content[self.pos]
         self.pos+=1
-        
         return c
     def isEOF(self):
         return self.pos+1 >= len(self.content)
