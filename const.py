@@ -107,7 +107,7 @@ _tableOfTypes={
     "^[a-zA-Z\_][a-zA-Z0-9\_]*[^a-zA-Z0-9\_]":TypeToken.TK_IDENTIFIER,
     "^[0-9]+[^0-9\.]":TypeToken.TK_INTEGER,
     "^[0-9]+\.[0-9]+[^0-9]":TypeToken.TK_FLOATINGPOINT,
-    "^\'.*\'(.|\n)":TypeToken.TK_CHARLITERAL,
+    "^\'.\'(.|\n)":TypeToken.TK_CHARLITERAL,
     "^\".*\"(.|\n)":TypeToken.TK_STRINGLITERAL,
     "^\+[^\+=]":TypeToken.TK_OPSUM,
     "^-[^-=>]":TypeToken.TK_OPSUB,

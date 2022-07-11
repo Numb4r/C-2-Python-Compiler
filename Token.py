@@ -1,5 +1,5 @@
 import const
-
+import re
 class Token:
     def __init__(self,tipo,lexeme=None,valor=None):
         self.tipo = tipo
@@ -12,6 +12,8 @@ class Token:
         string += ","+self.valor if self.lexeme != None and self.valor !=None else ""
         string += ">"
         return string
+    def __repr__(self):
+        return self.__str__()
 def validateTKHEAD(token:Token):
     print(token.valor)
     if token.lexeme == "include":
