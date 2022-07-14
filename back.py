@@ -30,7 +30,7 @@ _kw = [tt.TK_KWIF,tt.TK_KWFOR,tt.TK_KWELSE,tt.TK_KWRETURN]
 class Back:
     def __init__(self,sc:Scanner):
         self.sc = sc 
-        self.sc.resetPost()
+        self.sc.resetPos()
         self.code = ""
         self.identation = 0        
     def addIdentation(self):
@@ -38,17 +38,16 @@ class Back:
     def removeIdentation(self):
         self.identation-=1
     def applyIdentation(self):
-        print(self.identation)
         self.code+=str(self.identation*"    ")
     def transpile(self):
-        declaredVarsinFunctions = {
-
-        }
+        
+        declaredVarsinFunctions = {}
         functionAtual = None
         token = self.sc.nextToken()
         typeDeclaration = None
         identifierName = ""
         argsIdentifier = []
+        functionScope=""
         beginArgs=False
         beginCallFunction = False
         beginIdentifierDeclaration = False
@@ -56,7 +55,6 @@ class Back:
             if token.tipo in typeId:
                 typeDeclaration = token.tipo 
                 beginIdentifierDeclaration = True
-                print(token.tipo,end=" ")
             elif token.tipo is tt.TK_IDENTIFIER:
                 if beginArgs:
                     argsIdentifier.append(token.lexeme)
@@ -74,6 +72,7 @@ class Back:
                     argsIdentifier = []
                     typeDeclaration = None 
                     declaredVarsinFunctions[identifierName] = {}
+                    functionScope=identifierName
                     identifierName = ""
                     self.code+=":\n"
                     self.addIdentation()
@@ -84,9 +83,22 @@ class Back:
                     beginCallFunction = True
             elif token.tipo is tt.TK_PARENTHESESCLOSE:
                 beginArgs = False
+            # elif token.tipo is tt.TK_OPSEPARATOR and beginIdentifierDeclaration and functionScope != '':
+            #     self.code+=identifierName
+            #     if typeDeclaration is not None:
+            #         typeVar= _KWToStr.get(typeDeclaration)
+            #         self.code +=" = "
+            #         self.code+=str(typeVar)
+            #         self.code+="("
+            #         declaredVarsinFunctions[functionScope][identifierName] = typeVar
+            #     if len(argsIdentifier) > 0:
+            #         self.code+="".join(argsIdentifier)
+            #         argsIdentifier = []
+            #     if typeDeclaration is not None:
+            #         self.code+=")\n"
+                # self.applyIdentation()
                 
             elif token.tipo in _literals and beginArgs:
-                print("a")
                 argsIdentifier.append(token.lexeme)
             elif token.tipo in _literals:
                 self.code+=token.lexeme
@@ -102,46 +114,48 @@ class Back:
                 self.code+=_KWToStr.get(token.tipo)+" "
             elif token.tipo in _opToStr:
                 argsIdentifier.append(_opToStr.get(token.tipo))
-                # self.code+=_opToStr.get(token.tipo)+" "
             elif token.tipo is tt.TK_OPEOL:
                 beginArgs = False
                 if identifierName != "":
-                    # if beginCallFunction:
-                    #     beginCallFunction = False
-                    #     print(argsIdentifier)
-                    #     if identifierName == "scanf":
-                    #         # var = re.search("(&).*(\,|\))", "".join(argsIdentifier))
-                    #         # print(var)
-                    #         # argsIdentifier 
-                    #         self.code+=identifierName+" = "
-                    #         typeOfVar = declaredVarsinFunctions[functionAtual].get()
-
-
-                    #     identifierName = ""
-                    #     typeDeclaration = None 
-                    #     argsIdentifier = []
-                    #     pass
-                    # else:
-                    self.code+=identifierName
-                    if typeDeclaration is not None:
-                        self.code +=" = "
-                        self.code+=str(_KWToStr.get(typeDeclaration))
-                        self.code+="("
-                    if len(argsIdentifier) > 0:
-                        self.code+="".join(argsIdentifier)
+                    if beginCallFunction:
+                        beginCallFunction = False
+                        # print(argsIdentifier)
+                        if identifierName == "scanf":
+                            var = argsIdentifier[1]
+                            self.code+=var+" = "
+                            typeOfVar = declaredVarsinFunctions[functionScope][var]
+                            self.code+=typeOfVar+"(input())"
+                        elif identifierName == "printf":
+                            print(argsIdentifier)
+                            self.code+="print("
+                            self.code+=argsIdentifier[0]
+                            if len(argsIdentifier) > 1:
+                                self.code+="%("
+                                self.code+=",".join(argsIdentifier[1:])
+                                self.code+=")"
+                            self.code+=")"
+                        identifierName = ""
+                        typeDeclaration = None 
                         argsIdentifier = []
-                    if typeDeclaration is not None:
-                        self.code+=")"
-                    typeDeclaration = None 
-                    identifierName = ""
-                    beginIdentifierDeclaration = False
+                        pass
+                    else:
+                        self.code+=identifierName
+                        if typeDeclaration is not None:
+                            typeVar= _KWToStr.get(typeDeclaration)
+                            self.code +=" = "
+                            self.code+=str(typeVar)
+                            self.code+="("
+                            declaredVarsinFunctions[functionScope][identifierName] = typeVar
+                        if len(argsIdentifier) > 0:
+                            self.code+="".join(argsIdentifier)
+                            argsIdentifier = []
+                        if typeDeclaration is not None:
+                            self.code+=")"
+                        typeDeclaration = None 
+                        identifierName = ""
+                        beginIdentifierDeclaration = False
                 self.code+="\n"
                 self.applyIdentation()
-
-            
-
-            
-                
             token = self.sc.nextToken()
         f = open("out/toPy.py","w")
         f.write(self.code)

@@ -80,7 +80,7 @@ class Scanner:
         c = self.content[self.pos]
         self.pos+=1
         return c
-    def resetPost(self):
+    def resetPos(self):
         self.pos = 0
     def isEOF(self):
         return self.pos+1 >= len(self.content)

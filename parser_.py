@@ -9,7 +9,7 @@ class Parser:
     brackets = 0
     parentheses = 0
     braces = 0
-    st = SemanticAnalysis()
+    
     
     def __init__(self,scanner:Scanner):
         self.sc = scanner
@@ -38,7 +38,7 @@ class Parser:
                         self.parentheses-=1
                 if nextToken.tipo not in sg.get(token.tipo):
                     raise "Sintax Error"
-            self.st.analyseToken(token)
+            
             token = nextToken
 
         if self.braces != 0 or self.parentheses !=  0 or self.brackets != 0:

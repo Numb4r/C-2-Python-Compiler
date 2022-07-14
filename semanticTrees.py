@@ -1,6 +1,7 @@
 from const import TypeToken as tt
 from Token import Token
 from enum import Enum,auto 
+from scanner import Scanner
 
 _typeDeclaration = [
     tt.TK_KWINT,
@@ -73,14 +74,12 @@ def addValorFromLiteral(token):
 def validateAssignment(valor):
     
     while (tt.TK_PARENTHESESOPEN,None) in valor:
-        # print("ue")
         index = len(valor)+1
         pOpen = valor.index((tt.TK_PARENTHESESOPEN,None))
         pClose = valor.index((tt.TK_PARENTHESESCLOSE,None))
         resultValor = valor[pOpen+1:pClose]
         valor = validateAssignment(resultValor)
     while (tt.TK_OPMOD,None) in valor:
-        
         index = valor.index((tt.TK_OPMOD,None))
         op = valor[index][0]
         val = validateOperations(valor[index-1],op,valor[index+1])
@@ -118,6 +117,8 @@ def validateAssignment(valor):
         # print("valor:",valor[:index-1])
         # print("valor:",valor[index+2:])
         # print("val",val)
+        # print(valor[1])
+
         val = validateOperations(valor[index-1],op,valor[index+1])
         valorAux = valor[index+2:]
         valor = valor[:index-1] 
@@ -129,8 +130,7 @@ def validateAssignment(valor):
     return valor
 
     
-def validateOperations(valor1,operation,valor2):
-
+def validateOperations(valor1,operation,valor2):    
     if valor2[0] in  _typeAcceptance.get(valor1[0]) :
         if operation is tt.TK_OPDIV and float(valor1[1])== float(valor2[1])==0:
             raise BaseException("FLOATING POINT EXCEPTION: DIVISION BY 0") 
@@ -144,10 +144,11 @@ def validateOperations(valor1,operation,valor2):
         
 def validateValors(identifier,valor):
     
-    print("validate ",identifier.name," = ",valor)
+    # print("validate ",identifier.name," = ",valor)
+    
     valorFinal = validateAssignment(valor)
-    print("VALOR FINAL",valorFinal)
-
+    # print("VALOR FINAL",valorFinal)
+    # # print(valorFinal)
     if valorFinal[0][0] in _typeAcceptance.get(identifier.type):
         newType= _typeAcceptance.get(identifier.type)[0]
         valorFinal = [(newType,valorFinal[0][1])]
@@ -202,7 +203,9 @@ def getIdentinfier(identifier,scope):
 
 class SemanticAnalysis:
 
-    def __init__(self):
+    def __init__(self,sc:Scanner):
+        self.sc = sc
+        self.sc.resetPos()
         self.state = 0
         self.scopeLevel = 0
         self.scope = Scope(self.scopeLevel,'global',None)
@@ -217,6 +220,11 @@ class SemanticAnalysis:
         self.lastScopeDeclaration = 0
         self.beginIdentifierDeclaration = False
         
+    def analysis(self):
+        token = self.sc.nextToken()
+        while token != None:
+            self.analyseToken(token)
+            token = self.sc.nextToken()
 
     def analyseToken(self,token:Token):
         
@@ -244,6 +252,7 @@ class SemanticAnalysis:
         if token.tipo is tt.TK_OPEOL or ((token.tipo is tt.TK_PARENTHESESOPEN or token.tipo is tt.TK_PARENTHESESCLOSE) and not self.beginAssignment):
             # print("a")
             if self.beginAssignment and len(self.valorAssignment) > 0 and token.tipo is tt.TK_OPEOL:
+                print("a",self.valorAssignment)
                 error = validateValors(self.identifier,self.valorAssignment)
                 if not error[0]:
                     raise BaseException("ERROR CANNOT CONVERT ", error[1], " TO ", self.identifier.type)
@@ -282,7 +291,7 @@ class SemanticAnalysis:
 
         if self.beginAssignment:
             if token.tipo is tt.TK_IDENTIFIER and isIdentifierAlreadyDeclares(token,self.scope):
-
+                print("b",getIdentinfier(token,self.scope))
                 self.valorAssignment+=getIdentinfier(token,self.scope)._valor
             elif token.tipo is not tt.TK_IDENTIFIER:
                 self.valorAssignment.append(addValorFromLiteral(token))
